@@ -17,6 +17,11 @@ public static class HidDescriptors
 
     public const byte KeyboardReportId = 1;
     public const byte MouseReportId    = 2;
+    public const byte ConsumerReportId = 3;
+
+    /// <summary>Bits of the one-byte consumer-control input report.</summary>
+    public const byte ConsumerVolumeUp   = 0x01;
+    public const byte ConsumerVolumeDown = 0x02;
 
     public const byte ReportTypeInput  = 1;
     public const byte ReportTypeOutput = 2;
@@ -109,6 +114,24 @@ public static class HidDescriptors
         0x95, 0x01,       //     Report Count (1)
         0x81, 0x06,       //     Input (Data,Var,Rel) - wheel
         0xC0,             //   End Collection
+        0xC0,             // End Collection
+
+        // ---- Consumer control (Report ID 3) ----
+        // Volume Up is what Bluetooth camera remotes send: the iPhone Camera app treats it as
+        // the shutter / record button.
+        0x05, 0x0C,       // Usage Page (Consumer)
+        0x09, 0x01,       // Usage (Consumer Control)
+        0xA1, 0x01,       // Collection (Application)
+        0x85, ConsumerReportId,
+        0x15, 0x00,       //   Logical Minimum (0)
+        0x25, 0x01,       //   Logical Maximum (1)
+        0x09, 0xE9,       //   Usage (Volume Increment)
+        0x09, 0xEA,       //   Usage (Volume Decrement)
+        0x75, 0x01,       //   Report Size (1)
+        0x95, 0x02,       //   Report Count (2)
+        0x81, 0x02,       //   Input (Data,Var,Abs)
+        0x95, 0x06,       //   Report Count (6)
+        0x81, 0x01,       //   Input (Const)        - pad to a whole byte
         0xC0              // End Collection
     ];
 }

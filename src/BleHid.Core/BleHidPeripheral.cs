@@ -42,6 +42,8 @@ public sealed class BleHidPeripheral : IAsyncDisposable
     private GattServiceProvider? _batteryProvider;
     private GattLocalCharacteristic? _keyboardInput;
     private GattLocalCharacteristic? _mouseInput;
+    private GattLocalCharacteristic? _consumerInput;
+    private byte[] _lastConsumerReport = [0];
     private byte[] _lastKeyboardReport = new byte[HidReports.KeyboardReportLength];
     private byte[] _lastMouseReport = new byte[HidReports.MouseReportLength];
     private const byte CapsLockUsage = 0x39;
@@ -163,6 +165,9 @@ public sealed class BleHidPeripheral : IAsyncDisposable
 
         _mouseInput = await CreateInputReportAsync("Mouse input report", service,
             HidDescriptors.MouseReportId, () => _lastMouseReport);
+
+        _consumerInput = await CreateInputReportAsync("Consumer input report", service,
+            HidDescriptors.ConsumerReportId, () => _lastConsumerReport);
 
         await CreateBatteryServiceAsync();
 
@@ -622,6 +627,13 @@ public sealed class BleHidPeripheral : IAsyncDisposable
     {
         _lastMouseReport = HidReports.Mouse(buttons, dx, dy, wheel);
         return NotifyAsync(_mouseInput, _lastMouseReport);
+    }
+
+    /// <summary>Sends one consumer-control report; bits are HidDescriptors.ConsumerVolumeUp/Down, 0 releases.</summary>
+    public Task SendConsumerAsync(byte bits)
+    {
+        _lastConsumerReport = [bits];
+        return NotifyAsync(_consumerInput, _lastConsumerReport);
     }
 
     /// <summary>Subscribed hosts, de-duplicated across the keyboard and mouse reports.</summary>
